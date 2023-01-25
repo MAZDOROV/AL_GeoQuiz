@@ -28,6 +28,8 @@ class MainActivity : AppCompatActivity() {
         Question(R.string.question_asia, true)
     )
 
+    private lateinit var AnswerButtonsShown:Array<Boolean>
+
     private var currentIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,28 +45,35 @@ class MainActivity : AppCompatActivity() {
 
         trueButton.setOnClickListener { view: View ->
             checkAnswer(true)
+            hideAnswerButtons(currentIndex)
         }
 
         falseButton.setOnClickListener{ view: View ->
             checkAnswer(false)
+            hideAnswerButtons(currentIndex)
         }
         nextButton.setOnClickListener{
             nextAction()
         }
         previewButton.setOnClickListener{
-            currentIndex = if(currentIndex == 0)
-                questionBank.size - 1
-            else
-                currentIndex - 1
-            updateQuestion()
+            previewAction()
         }
         questionTextView.setOnClickListener{view: View ->
             nextAction()
         }
+        AnswerButtonsShown = Array(questionBank.size) { i -> true }
 
         updateQuestion()
     }
 
+    private fun hideAnswerButtons(index:Int) {
+        AnswerButtonsShown.set(index, false)
+        setEnabledAnswerButtons(index)
+    }
+    private fun setEnabledAnswerButtons(index:Int){
+        trueButton.setEnabled(AnswerButtonsShown[index])
+        falseButton.setEnabled(AnswerButtonsShown[index])
+    }
     override fun onStart() {
         super.onStart()
         Log.d(TAG, "onStart() called")
@@ -92,9 +101,18 @@ class MainActivity : AppCompatActivity() {
         updateQuestion()
     }
 
+    private fun previewAction() {
+        currentIndex = if (currentIndex == 0)
+            questionBank.size - 1
+        else
+            currentIndex - 1
+        updateQuestion()
+    }
+
     private fun updateQuestion() {
         val questionTextResId = questionBank[currentIndex].textResId
         questionTextView.setText(questionTextResId)
+        setEnabledAnswerButtons(currentIndex)
     }
 
     private fun checkAnswer(userAnswer: Boolean){
@@ -111,5 +129,6 @@ class MainActivity : AppCompatActivity() {
         )
         toast.setGravity(Gravity.TOP, 0, 0)
         toast.show()
+
     }
 }
