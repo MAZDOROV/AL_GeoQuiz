@@ -28,6 +28,8 @@ class MainActivity : AppCompatActivity() {
         Question(R.string.question_asia, true)
     )
 
+    private var answers = mutableListOf<Answer>()
+
     private lateinit var AnswerButtonsShown:Array<Boolean>
 
     private var currentIndex = 0
@@ -116,8 +118,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(userAnswer: Boolean){
-        val currentAnswer = questionBank[currentIndex].answer
-        val messageResId = if (userAnswer == currentAnswer){
+        val isAnswerCorrect: Boolean =  isAnswerCorrect(userAnswer)
+        rememberAnswer(currentIndex, isAnswerCorrect)
+        showAnswer(isAnswerCorrect)
+    }
+
+    private fun showAnswer(answerCorrect: Boolean) {
+        val messageResId = if (answerCorrect){
             R.string.correct_toast
         } else {
             R.string.incorrect_toast
@@ -130,5 +137,35 @@ class MainActivity : AppCompatActivity() {
         toast.setGravity(Gravity.TOP, 0, 0)
         toast.show()
 
+        if(questionBank.count() == answers.count())
+        {
+            showPercent()
+        }
+    }
+
+    private fun isAnswerCorrect(userAnswer:Boolean):Boolean {
+        val currentAnswer = questionBank[currentIndex].answer
+        return userAnswer == currentAnswer
+    }
+
+    private fun rememberAnswer(QuestionIndex: Int, isAnswerCorrect: Boolean) {
+        if(questionBank.count() > answers.count())
+        {
+            answers.add(Answer(QuestionIndex, isAnswerCorrect))
+        }
+    }
+
+    private fun showPercent() {
+        val correctAnswersCount = answers.filter { answer -> answer.CorrectAnswer }.size
+        val correctAnswersPercent: Double = (100.toDouble() / answers.size.toDouble()) * correctAnswersCount.toDouble()
+        val message = String.format( "Correct answers %d / %d  %.2f percent ", correctAnswersCount, answers.size, correctAnswersPercent )
+
+        val toast = android.widget.Toast.makeText(
+            this,
+            message,
+            Toast.LENGTH_LONG
+        )
+        toast.setGravity(Gravity.TOP, 0, 0)
+        toast.show()
     }
 }
